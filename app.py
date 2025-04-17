@@ -7,6 +7,15 @@ st.set_page_config(
     page_icon="📅",
     layout="centered",  # ou "wide" si tu veux un affichage plein écran
 )
+st.markdown(
+    """
+    <div style='text-align: center; padding: 20px; background-color: #f0f2f6; border-radius: 12px;'>
+        <h1 style='color:#2c3e50;'>👨‍👩‍👧‍👦 Bienvenue sur l'agenda de la famille Mbuyi !</h1>
+        <p style='font-size:18px; color:#555;'>Planifiez, partagez, et profitez de chaque moment ensemble 💖</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 FICHIER_EVENTS = "evenements.json"
 
