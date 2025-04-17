@@ -52,3 +52,18 @@ for i, event in enumerate(evenements):
             enregistrer_evenements(evenements)
             st.success("Événement supprimé !")
             st.experimental_rerun()
+# Mot de passe de la famille
+MOT_DE_PASSE = "owenfamily"
+
+if "authentifie" not in st.session_state:
+    st.session_state.authentifie = False
+
+if not st.session_state.authentifie:
+    mdp = st.text_input("🔒 Entrez le mot de passe", type="password")
+    if mdp == MOT_DE_PASSE:
+        st.success("🔓 Accès autorisé")
+        st.session_state.authentifie = True
+        st.experimental_rerun()
+    elif mdp != "":
+        st.error("Mot de passe incorrect")
+    st.stop()  # Stoppe l'app si pas authentifié
