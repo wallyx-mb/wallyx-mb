@@ -1,32 +1,31 @@
-
 import streamlit as st
 import json
 import os
 from datetime import datetime, timedelta
 
 st.set_page_config(
-    page_title="Agenda Familial 👨‍👩‍👧‍👦",
+    page_title="Agenda Familial",
     page_icon="📅",
-    layout="centered"
+    layout="wide"
 )
 
 st.markdown(
     """
     <div style='text-align: center; padding: 25px; background-color: #1f2937; border-radius: 16px;'>
         <h1 style='font-size: 36px; color: #f9fafb;'>📅 Agenda de la famille Mbuyi</h1>
-        <p style='font-size: 16px; color: #9ca3af;'>Organisez les moments importants, tous au même endroit 🤍</p>
+        <p style='font-size: 16px; color: #9ca3af;'>Organisez les moments importants, tous au même endroit 💖</p>
     </div>
     """,
     unsafe_allow_html=True
 )
 
+# Authentification simple
 MOT_DE_PASSE = "famille123"
-
 if "authentifie" not in st.session_state:
     st.session_state.authentifie = False
 
 if not st.session_state.authentifie:
-    mdp = st.text_input("🔒 Entrez le mot de passe", type="password")
+    mdp = st.text_input("🔐 Entrez le mot de passe", type="password")
     if mdp == MOT_DE_PASSE:
         st.success("🔓 Accès autorisé")
         st.session_state.authentifie = True
@@ -35,8 +34,8 @@ if not st.session_state.authentifie:
         st.error("Mot de passe incorrect")
     st.stop()
 
+# Chargement / Sauvegarde JSON
 FICHIER_EVENTS = "evenements.json"
-
 def charger_evenements():
     if os.path.exists(FICHIER_EVENTS):
         with open(FICHIER_EVENTS, "r") as f:
@@ -47,35 +46,26 @@ def enregistrer_evenements(evenements):
     with open(FICHIER_EVENTS, "w") as f:
         json.dump(evenements, f, indent=2)
 
+# Formulaire événement
 evenements = charger_evenements()
-
-st.subheader("🔔 Rappels")
-auj = datetime.today().date()
-a_venir = [e for e in evenements if auj <= datetime.strptime(e["date"], "%Y-%m-%d").date() <= auj + timedelta(days=2)]
-if a_venir:
-    for e in a_venir:
-        st.warning(f"🔔 Rappel : **{e['titre']}** est prévu le {e['date']} !")
-else:
-    st.info("Aucun événement imminent.")
-
-st.subheader("➕ Ajouter / Modifier un événement")
-
 if "mode_edition" not in st.session_state:
     st.session_state.mode_edition = False
 if "index_modif" not in st.session_state:
     st.session_state.index_modif = -1
 
+st.subheader("➕ Ajouter / Modifier un événement")
 with st.form("ajout_event"):
     titre = st.text_input("Titre", value=evenements[st.session_state.index_modif]["titre"] if st.session_state.mode_edition else "")
     date = st.date_input("Date", value=datetime.strptime(evenements[st.session_state.index_modif]["date"], "%Y-%m-%d").date() if st.session_state.mode_edition else datetime.today())
     description = st.text_area("Description", value=evenements[st.session_state.index_modif]["description"] if st.session_state.mode_edition else "")
-
+    couleur = st.color_picker("Couleur de l'événement", value=evenements[st.session_state.index_modif]["couleur"] if st.session_state.mode_edition else "#1f77b4")
     submit = st.form_submit_button("✅ Enregistrer")
     if submit:
         nouvel_event = {
             "titre": titre,
             "date": date.strftime("%Y-%m-%d"),
-            "description": description
+            "description": description,
+            "couleur": couleur
         }
         if st.session_state.mode_edition:
             evenements[st.session_state.index_modif] = nouvel_event
@@ -88,14 +78,14 @@ with st.form("ajout_event"):
         st.session_state.index_modif = -1
         st.rerun()
 
-st.subheader("📆 Calendrier du mois")
-
+# Calendrier mensuel
+st.subheader("📆 Calendrier mensuel")
 evenements = sorted(evenements, key=lambda e: e["date"])
 mois_actuel = datetime.today().strftime("%Y-%m")
 for i, e in enumerate(evenements):
     if e["date"].startswith(mois_actuel):
         with st.expander(f"{e['date']} – {e['titre']}"):
-            st.write(e["description"])
+            st.markdown(f"<div style='border-left: 5px solid {e['couleur']}; padding-left: 10px;'>" + e["description"] + "</div>", unsafe_allow_html=True)
             col1, col2 = st.columns(2)
             if col1.button("✏️ Modifier", key=f"modif_{i}"):
                 st.session_state.mode_edition = True
@@ -106,25 +96,22 @@ for i, e in enumerate(evenements):
                 enregistrer_evenements(evenements)
                 st.success("Événement supprimé.")
                 st.rerun()
-st.subheader("🗓️ Planning Hebdomadaire")
 
+# Planning hebdomadaire
+st.subheader("🗓️ Planning Hebdomadaire")
 jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 colonnes = st.columns(7)
-
 hebdo = {jour: [] for jour in jours_semaine}
 
 for event in evenements:
     try:
         date_event = datetime.strptime(event["date"], "%Y-%m-%d")
-        jour_nom = date_event.strftime("%A").capitalize()
-        if jour_nom == "Monday": jour_nom = "Lundi"
-        elif jour_nom == "Tuesday": jour_nom = "Mardi"
-        elif jour_nom == "Wednesday": jour_nom = "Mercredi"
-        elif jour_nom == "Thursday": jour_nom = "Jeudi"
-        elif jour_nom == "Friday": jour_nom = "Vendredi"
-        elif jour_nom == "Saturday": jour_nom = "Samedi"
-        elif jour_nom == "Sunday": jour_nom = "Dimanche"
-        hebdo[jour_nom].append(event)
+        jour_nom = date_event.strftime("%A")
+        fr_jour = {
+            "Monday": "Lundi", "Tuesday": "Mardi", "Wednesday": "Mercredi",
+            "Thursday": "Jeudi", "Friday": "Vendredi", "Saturday": "Samedi", "Sunday": "Dimanche"
+        }.get(jour_nom, jour_nom)
+        hebdo[fr_jour].append(event)
     except:
         pass
 
@@ -133,6 +120,6 @@ for i, jour in enumerate(jours_semaine):
         st.markdown(f"### {jour}")
         if hebdo[jour]:
             for evt in hebdo[jour]:
-                st.markdown(f"- **{evt['titre']}**<br/><small>{evt['description']}</small>", unsafe_allow_html=True)
+                st.markdown(f"<div style='border-left: 4px solid {evt['couleur']}; padding-left: 6px;'>✓ <b>{evt['titre']}</b><br/><small>{evt['description']}</small></div>", unsafe_allow_html=True)
         else:
             st.markdown("_Aucun événement_")
