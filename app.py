@@ -22,7 +22,7 @@ if "acces_autorise" not in st.session_state:
     mot_de_passe = st.text_input("Entrez le mot de passe", type="password")
     if mot_de_passe == MOT_DE_PASSE:
         st.session_state.acces_autorise = True
-        st.experimental_rerun()
+        st.rerun()
     else:
         st.stop()
 
