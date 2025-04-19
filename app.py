@@ -16,7 +16,8 @@ st.markdown("""
     <p style='text-align: center;'>Organisez les moments importants, tous au même endroit 💖</p>
 """, unsafe_allow_html=True)
 
-MOT_DE_PASSE = "famille123"
+MOT_DE_PASSE = "agenda123"  # 🔒 Choisis ici ton mot de passe
+
 
 if "acces_autorise" not in st.session_state:
     mot_de_passe = st.text_input("Entrez le mot de passe", type="password")
