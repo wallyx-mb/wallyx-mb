@@ -20,11 +20,18 @@ MOT_DE_PASSE = "famille123"
 
 if "acces_autorise" not in st.session_state:
     mot_de_passe = st.text_input("Entrez le mot de passe", type="password")
-    if mot_de_passe == MOT_DE_PASSE:
-        st.session_state.acces_autorise = True
+if mot_de_passe == MOT_DE_PASSE:
+    st.session_state.acces_autorise = True
+    if hasattr(st, "experimental_rerun"):
+        st.experimental_rerun()
+    elif hasattr(st, "rerun"):
         st.rerun()
     else:
-        st.stop()
+        st.warning("Impossible de redémarrer l'app automatiquement.")
+else:
+    st.stop()
+
+
 
 # Chargement des événements
 DATA_PATH = "evenements.json"
