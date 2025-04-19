@@ -106,3 +106,33 @@ for i, e in enumerate(evenements):
                 enregistrer_evenements(evenements)
                 st.success("Événement supprimé.")
                 st.rerun()
+st.subheader("🗓️ Planning Hebdomadaire")
+
+jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+colonnes = st.columns(7)
+
+hebdo = {jour: [] for jour in jours_semaine}
+
+for event in evenements:
+    try:
+        date_event = datetime.strptime(event["date"], "%Y-%m-%d")
+        jour_nom = date_event.strftime("%A").capitalize()
+        if jour_nom == "Monday": jour_nom = "Lundi"
+        elif jour_nom == "Tuesday": jour_nom = "Mardi"
+        elif jour_nom == "Wednesday": jour_nom = "Mercredi"
+        elif jour_nom == "Thursday": jour_nom = "Jeudi"
+        elif jour_nom == "Friday": jour_nom = "Vendredi"
+        elif jour_nom == "Saturday": jour_nom = "Samedi"
+        elif jour_nom == "Sunday": jour_nom = "Dimanche"
+        hebdo[jour_nom].append(event)
+    except:
+        pass
+
+for i, jour in enumerate(jours_semaine):
+    with colonnes[i]:
+        st.markdown(f"### {jour}")
+        if hebdo[jour]:
+            for evt in hebdo[jour]:
+                st.markdown(f"- **{evt['titre']}**<br/><small>{evt['description']}</small>", unsafe_allow_html=True)
+        else:
+            st.markdown("_Aucun événement_")
